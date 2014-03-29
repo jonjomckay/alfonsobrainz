@@ -1,32 +1,72 @@
 import requests
 
-VERSION = '0.5'
+from alfonsobrainz.rate_limit import rate_limited
 
-def get_version():
-    return VERSION
 
-def get_recording_by_id(mbid, includes=[]):
-    return _send_query('recording', mbid, includes)
+class Alfonsobrainz(object):
+    def __init__(self, user_agent, hostname='https://musicbrainz.org', requests_per_second=2):
+        self._user_agent = user_agent
+        self._hostname = hostname
+        self._requests_per_second = requests_per_second
 
-def _generate_url(path):
-    return 'https://musicbrainz.org/ws/2/%s' % path
+    @property
+    def hostname(self):
+        return self._hostname
 
-def _send_query(entity, mbid, includes=[]):
-    if not isinstance(includes, list):
-        includes = [includes]
+    @property
+    def requests_per_second(self):
+        return self._requests_per_second
 
-    # TODO: Check to see if includes are valid
+    @property
+    def user_agent(self):
+        return self._user_agent
 
-    args = {}
+    def get_area_by_id(self, mbid, includes=[]):
+        return self._send_query('area', mbid, includes)
 
-    if includes.__len__() > 0:
-        args['inc'] = ' '.join(includes)
+    def get_artist_by_id(self, mbid, includes=[]):
+        return self._send_query('artist', mbid, includes)
 
-    path = '%s/%s' % (entity, mbid)
+    def get_label_by_id(self, mbid, includes=[]):
+        return self._send_query('label', mbid, includes)
 
-    return _send_get_request(path, args)
+    def get_place_by_id(self, mbid, includes=[]):
+        return self._send_query('place', mbid, includes)
 
-def _send_get_request(path, params):
-    params['fmt'] = 'json'
+    def get_recording_by_id(self, mbid, includes=[]):
+        return self._send_query('recording', mbid, includes)
 
-    return requests.get(_generate_url(path), params=params).json()
+    def get_release_by_id(self, mbid, includes=[]):
+        return self._send_query('release', mbid, includes)
+
+    def get_release_group_by_id(self, mbid, includes=[]):
+        return self._send_query('release-group', mbid, includes)
+
+    def get_work_by_id(self, mbid, includes=[]):
+        return self._send_query('work', mbid, includes)
+
+    def _send_query(self, entity, mbid, includes=[]):
+        if not isinstance(includes, list):
+            includes = [includes]
+
+        # TODO: Check to see if includes are valid
+
+        args = {}
+
+        if includes.__len__() > 0:
+            args['inc'] = ' '.join(includes)
+
+        path = '%s/%s' % (entity, mbid)
+
+        return self._send_get_request(path, args)
+
+    def _generate_url(self, path):
+        return '%s/ws/2/%s' % (self.hostname, path)
+
+    @rate_limited(2)
+    def _send_get_request(self, path, params):
+        headers = {'User-Agent': self.user_agent}
+
+        params['fmt'] = 'json'
+
+        return requests.get(self._generate_url(path), params=params, headers=headers).json()
