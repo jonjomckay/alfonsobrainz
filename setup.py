@@ -1,11 +1,10 @@
 #!/usr/bin/env python
 from distutils.core import setup
 from setuptools import find_packages
-from alfonsobrainz import musicbrainz
 
 setup(
     name='alfonsobrainz',
-    version=musicbrainz.get_version(),
+    version='0.5',
     description='Python 3 bindings for the MusicBrainz /ws/2 web service',
     author='Jonjo McKay',
     author_email='jonjo@jonjomckay.com',
