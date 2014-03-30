@@ -1,25 +1,25 @@
 import requests
 
+try:
+    import requests_cache
+
+    requests_cache_available = True
+except ImportError:
+    requests_cache_available = False
+
 from alfonsobrainz.rate_limit import rate_limited
 
 
 class Alfonsobrainz(object):
-    def __init__(self, user_agent, hostname='https://musicbrainz.org', requests_per_second=2):
-        self._user_agent = user_agent
-        self._hostname = hostname
-        self._requests_per_second = requests_per_second
+    def __init__(self):
+        self.user_agent = 'alfonsobrainz'
+        self.hostname = 'https://musicbrainz.org'
+        self.requests_per_second = 2
 
-    @property
-    def hostname(self):
-        return self._hostname
-
-    @property
-    def requests_per_second(self):
-        return self._requests_per_second
-
-    @property
-    def user_agent(self):
-        return self._user_agent
+    # TODO: Perfect this method - it doesn't give any completion hints...
+    def enable_caching(self, args, **kwargs):
+        if requests_cache_available:
+            requests_cache.install_cache(args, **kwargs)
 
     def get_area_by_id(self, mbid, includes=[]):
         return self._send_query('area', mbid, includes)

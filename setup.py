@@ -11,6 +11,9 @@ setup(
     url='https://github.com/jonjomckay/alfonsobrainz',
     packages=find_packages(),
     install_requires=['requests>=2.2.1'],
+    extras_require={
+        'requests-caching': ['requests-cache>=0.4.4']
+    },
     license='MIT',
     classifiers=[
         'Development Status :: 3 - Alpha',
